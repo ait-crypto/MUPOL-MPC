@@ -20,10 +20,6 @@ Poetry install:
     paths:
       - .venv/
       - .cache/pip
-  rules:
-    - changes:
-      - .gitlab-ci.yml
-      - pyproject.toml
   script:
     - pip install poetry
     - poetry config http-basic.mupol-plaintext $CI_DEPLOY_USER $CI_DEPLOY_PASSWORD
