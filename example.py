@@ -11,9 +11,11 @@ from mupol.mpc.solver import MPCSolver
 from mupol.mpc.utils.args_handler import MPCArgsHandler
 from mupol.mpc.utils.logger import setup_logger
 
-if __name__ == "__main__":
+
+async def main() -> None:
     args = MPCArgsHandler(sys.argv[1:]).args
     logger = setup_logger(args.logger_config)
+    await mpc.start()
     generator = RandomProblemGenerator(
         args.num_freighters,
         args.min_num_trucks,
@@ -26,13 +28,19 @@ if __name__ == "__main__":
     )
     problem: Problem = generator.get_problem()
 
-    mpc.run(
-        prepare_mpc_data(
-            problem, args.dummy_freighter_id, args.dummy_node, args.bit_length_sectypes
-        )
+    logger.debug("Uploading data in MPC")
+    await prepare_mpc_data(
+        problem, args.dummy_freighter_id, args.dummy_node, args.bit_length_sectypes
     )
 
+    logger.debug("Running solver")
     solver = MPCSolver(
         problem, args.dummy_freighter_id, args.dummy_node, args.truck_capacity, logger
     )
-    mpc.run(solver.solve_problem())
+    await solver.solve_problem()
+
+    await mpc.shutdown()
+
+
+if __name__ == "__main__":
+    mpc.run(main())

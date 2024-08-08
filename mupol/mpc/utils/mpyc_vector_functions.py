@@ -42,14 +42,11 @@ async def compute_indicator_vector(
     :rtype: List[SecureInteger]
     """
     sec_type = type(index)
-    async with mpc:
-        indicator_vector = [mpc.input(sec_type(0), senders=0) for _ in range(length)]
-        valid = mpc.input(sec_type(1), senders=0)
-        for j in range(length):
-            indicator_vector[j] = mpc.if_else(
-                mpc.eq(j, index), valid, indicator_vector[j]
-            )
-        return indicator_vector
+    indicator_vector = [mpc.input(sec_type(0), senders=0) for _ in range(length)]
+    valid = mpc.input(sec_type(1), senders=0)
+    for j in range(length):
+        indicator_vector[j] = mpc.if_else(mpc.eq(j, index), valid, indicator_vector[j])
+    return indicator_vector
 
 
 async def find_first_non_zero(secret_list: List[SecureInteger]) -> List[SecureInteger]:
@@ -62,12 +59,11 @@ async def find_first_non_zero(secret_list: List[SecureInteger]) -> List[SecureIn
     position of the input vector, and 0 elsewhere
     """
     sec_type = type(secret_list[0])
-    async with mpc:
-        first_non_zero_list = [
-            mpc.input(sec_type(0), senders=0) for _ in range(len(secret_list))
-        ]
-        already_set = mpc.input(sec_type(0), senders=0)
-        for j in range(len(secret_list)):
-            first_non_zero_list[j] = secret_list[j] * (1 - already_set)
-            already_set = await real_or(already_set, secret_list[j])
-        return first_non_zero_list
+    first_non_zero_list = [
+        mpc.input(sec_type(0), senders=0) for _ in range(len(secret_list))
+    ]
+    already_set = mpc.input(sec_type(0), senders=0)
+    for j in range(len(secret_list)):
+        first_non_zero_list[j] = secret_list[j] * (1 - already_set)
+        already_set = await real_or(already_set, secret_list[j])
+    return first_non_zero_list

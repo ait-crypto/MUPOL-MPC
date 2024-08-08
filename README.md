@@ -25,5 +25,4 @@ At this point, you should be able to install dependencies with `poetry install`.
 ## Example usage :checkered_flag:
 
 After install, run `poetry run python3 example.py`.
-Currently, it is not possible to direclty suppress the log output of MPyC;
-you can filter that out by piping the above command into grep, e.g. `poetry run python3 examply.py | grep "MUPOL"`.
+If you want to fully simulate several parties (e.g., 3) with separate processes, use the corresponding MPyC syntax, i.e., `poetry run python3 example.py -M 3`.
