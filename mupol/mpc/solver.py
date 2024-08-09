@@ -339,9 +339,10 @@ class MPCSolver:
             self.logger.info("Revealing order %s", order.id)
             freighter_id = await mpc.output(order.freighter_id)
             self.logger.info("Freighter: %s", freighter_id)
-            await mpc.output(order.origin, receivers=freighter_id)
-            mpc.output(order.destination, receivers=freighter_id)
-            mpc.output(order.volume, receivers=freighter_id)
+            # TODO: Reveal order info only to MPC party controlling relevant freighter
+            await mpc.output(order.origin, receivers=0)
+            await mpc.output(order.destination, receivers=0)
+            await mpc.output(order.volume, receivers=0)
             # Test only!
             self.logger.debug("Origin: %s", await mpc.output(order.origin))
             self.logger.debug("Destination: %s", await mpc.output(order.destination))
@@ -349,10 +350,9 @@ class MPCSolver:
 
         for empty_drive in self.empty_drives:
             freighter_id = await mpc.output(empty_drive.freighter_id)
-            await mpc.output(empty_drive.closest_position, receivers=freighter_id)
-            await mpc.output(
-                empty_drive.first_unprocessed_origin, receivers=freighter_id
-            )
+            # TODO: Reveal order info only to MPC party controlling relevant freighter
+            await mpc.output(empty_drive.closest_position, receivers=0)
+            await mpc.output(empty_drive.first_unprocessed_origin, receivers=0)
             # Test only!
             self.logger.debug(
                 "Revealing empty drive: %s %s",
