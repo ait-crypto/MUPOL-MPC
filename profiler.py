@@ -25,6 +25,7 @@ async def run_profiler(possible_orders: List[int], possible_trucks: List[int]) -
     combined_parameters = itertools.product(possible_orders, possible_trucks)
     args = MPCArgsHandler(["--config=config_scalability.ini"]).args
     logger = setup_logger(args.logger_config)
+    await mpc.start()
     for num_orders, num_trucks in combined_parameters:
         generator = RandomProblemGenerator(
             num_freighters=args.num_freighters,
@@ -60,6 +61,7 @@ async def run_profiler(possible_orders: List[int], possible_trucks: List[int]) -
         )
         await solver.solve_problem()
         logger.debug("----------------------------------------------------------")
+    await mpc.shutdown()
 
 
 if __name__ == "__main__":
