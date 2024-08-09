@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mupol-mpc"
-version = "1.1.0"
+version = "1.1.1"
 description = ""
 authors = ["Gabriele Spini <gabriele.spini@ait.ac.at>"]
 readme = "README.md"
