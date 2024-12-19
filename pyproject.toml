@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "mupol-mpc"
+version = "1.1.1"
+description = ""
+authors = ["Gabriele Spini <gabriele.spini@ait.ac.at>"]
+readme = "README.md"
+packages = [{include = "mupol"}]
+
+[tool.poetry.dependencies]
+python = "^3.10.2"
+mupol-plaintext = {version = "^0.3.2", source = "mupol-plaintext"}
+mpyc = "^0.10"
+gmpy2 = {version = "^2.1.5", optional = true}
+typing = {version = "^3.10", python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <3.5"}
+numpy = {version = "^1.26.4", optional = true}
+
+[[tool.poetry.source]]
+name = "mupol-plaintext"
+url = "https://git-service.ait.ac.at/api/v4/projects/sct-crypto%2Fmupol%2Fmupol-python-plaintext/packages/pypi/simple"
+priority = "supplemental"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.0"
+isort = {extras = ["colors"], version = "^5.13.2"}
+mypy = "^1.9.0"
+pytest = "^8.1.1"
+bandit = "^1.7.8"
+flake8 = "^7.0.0"
+pytest-asyncio = "^0.23.6"
+pytest-cov = "^5.0.0"
+pytest-randomly = "^3.15.0"
+types-setuptools = "^70.0.0.20240524"
+pdoc = "^14.5.1"
+
+
+[tool.poetry.extras]
+gmpy = ["gmpy2"]
+numpy = ["numpy"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
