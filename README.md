@@ -9,7 +9,7 @@ Installation and dependencies are managed by [Poetry](https://python-poetry.org/
 ### Internal dependencies
 
 Furthermore, this project uses [MUPOL plaintext](https://github.com/ait-crypto/MUPOL-Plaintext).
-You will need to install this repository in your Python virtual environment.
+The project code is currently not provided in a Python package, hence it is up to the user to create such a package and add it to the Python virtual environment.
 
 
 ## Example usage :checkered_flag:
