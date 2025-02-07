@@ -1,24 +1,18 @@
 [tool.poetry]
 name = "mupol-mpc"
-version = "1.1.1"
-description = ""
+version = "2.0.0"
+description = "MPC solution for the collaborative freighter delivery problem"
 authors = ["Gabriele Spini <gabriele.spini@ait.ac.at>"]
 readme = "README.md"
 packages = [{include = "mupol"}]
 
 [tool.poetry.dependencies]
 python = "^3.10.2"
-mupol-plaintext = {version = "^0.3.2", source = "mupol-plaintext"}
+mupol-plaintext = { git = "https://github.com/ait-crypto/MUPOL-Plaintext.git", tag = "v0.3.3"}
 mpyc = "^0.10"
 gmpy2 = {version = "^2.1.5", optional = true}
 typing = {version = "^3.10", python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <3.5"}
 numpy = {version = "^1.26.4", optional = true}
-
-[[tool.poetry.source]]
-name = "mupol-plaintext"
-url = "https://git-service.ait.ac.at/api/v4/projects/sct-crypto%2Fmupol%2Fmupol-python-plaintext/packages/pypi/simple"
-priority = "supplemental"
-
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.0"
