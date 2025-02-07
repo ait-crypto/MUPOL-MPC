@@ -11,10 +11,12 @@ In a nutshell, given a problem instance generated with the MUPOL plaintext libra
 
 Installation and dependencies are managed by [Poetry](https://python-poetry.org/), which can be installed with `pipx install poetry`.
 
+Once you've cloned the project, just run `poetry install` and you should be good to go.
+
 ### Internal dependencies
 
-Furthermore, this project uses [MUPOL plaintext](https://github.com/ait-crypto/MUPOL-Plaintext).
-The project code is currently not provided in a Python package, hence it is up to the user to create such a package and add it to the Python virtual environment.
+This project uses a non-PyPI repository, [MUPOL plaintext](https://github.com/ait-crypto/MUPOL-Plaintext), as a dependency.
+It will be installed from source by Poetry when you run `poetry install`, so this should not affect the user.
 
 ## Content :clipboard:
 
