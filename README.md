@@ -35,6 +35,6 @@ If you want to fully simulate several parties (e.g., 3) with separate processes,
 
 ## Credits
 
-This project was partially funded by the Austrian Research Promotiion Agency (FFG) with the "Digitale Technolgien" funding frame under grant agreement no. 902669 (MUPOL).
+This project was partially funded by the Austrian Research Promotiion Agency (FFG) with the "Digitale Technologien" funding frame under grant agreement no. 902669 (MUPOL).
 
 Authors: Gabriele Spini and Stephan Krenn, AIT.
