@@ -40,7 +40,15 @@ async def main() -> None:
         problem, args.dummy_freighter_id, args.dummy_node, args.bit_length_sectypes
     )
 
-<<<<<<< HEAD
+    if args.test_mode == 1:
+        for order in problem.orders:
+            logger.debug(
+                "Order: volume %s origin %s destination %s",
+                await mpc.output(order.volume),
+                await mpc.output(order.origin),
+                await mpc.output(order.destination),
+            )
+
     logger.debug("Running solver")
     solver = MPCSolver(
         problem,

@@ -15,6 +15,7 @@ from mupol.plaintext.freighters_day_planning.order import Order
 from mupol.plaintext.freighters_day_planning.problem import Problem
 from mupol.plaintext.freighters_day_planning.simple_solver import SimpleSolver
 from mupol.plaintext.freighters_day_planning.truck import Truck
+from mupol.plaintext.freighters_day_planning.truck_drive import TruckDrive
 
 from mupol.mpc.utils.mpyc_vector_functions import real_or
 
@@ -72,9 +73,26 @@ class MPCSolver:
         self.dummy_freighter_id = dummy_freighter_id
         self.dummy_node = dummy_node
         self.truck_capacity = truck_capacity
+        self.use_priorities = use_priorities
+        self.test_mode = test_mode
+        if norm_weight is not None:
+            self.norm_weight = norm_weight
+        self.logger = logger
+        if self.test_mode == 1:
+            self.logger.warning(
+                "Test mode: more values will be revealed than necessary!"
+            )
+        if self.use_priorities == 1:
+            self.logger.info("Using order priorities")
+        self.empty_drives: List[EmptyDrive] = []
+        self.solution: List[TruckDrive] = []
         self.num_processed_orders: int = 0
         self.secure_node_type = type(self.orders[0].origin)
-        self.logger = logger
+        self._route_matrix: Optional[List[List[SecureInteger]]] = None
+
+    async def _reveal_truck_drive_details(self, truck_drive: TruckDrive) -> None:
+        """Crude function to reveal (i.e. reconstruct) secret-shared data of a truck
+        drive.
 
         :param truck_drive: a TruckDrive object, possibly containing secret-shared
         objects
@@ -261,12 +279,10 @@ class MPCSolver:
         :param truck: the truck object
         :param node_indicator_vector: the node, expressed as an indicator vector
         """
-        truck_position_vec = await compute_indicator_vector(
-            len(self.map.positions), truck.position
-        )
+        truck_position_vec = mpc.unit_vector(truck.position, len(self.map.positions))
 
-        # mpc.matrix_prod will return a 1-by-1 matrix, we only pick the value
-        # of the only entry
+        # mpc.matrix_prod will return a 1-by-1 matrix, so we need to select the value
+        # of the first (and only) entry
         truck.dist_to_order = mpc.matrix_prod(
             [truck_position_vec],
             mpc.matrix_prod(self._route_matrix, [node_indicator_vector], tr=True),
@@ -571,11 +587,17 @@ class MPCSolver:
             await self._fill_trucks()
             await mpc.barrier()
 
-            num_added_orders = sum(order.process_this_round for order in self.orders)
-            num_added_orders = await mpc.output(num_added_orders)  # Revealed!
-            self.logger.debug("Orders processed in this round: %s", num_added_orders)
+            num_orders_processed_this_round = sum(
+                order.process_this_round for order in self.orders
+            )
+            num_orders_processed_this_round = await mpc.output(
+                num_orders_processed_this_round
+            )  # Revealed!
+            self.logger.debug(
+                "Orders processed in this round: %s", num_orders_processed_this_round
+            )
 
-            if num_added_orders == 0:
+            if num_orders_processed_this_round == 0:
                 self.logger.info("Creating empty truck drive...")
                 await self._create_empty_truck_drive()
                 await mpc.barrier()
@@ -586,18 +608,7 @@ class MPCSolver:
 
             self.num_processed_orders += num_orders_processed_this_round
 
-        for order in self.orders:
-            self.logger.info("Revealing order %s", order.id)
-            freighter_id = await mpc.output(order.freighter_id)
-            self.logger.info("Freighter: %s", freighter_id)
-            # TODO: Reveal order info only to MPC party controlling relevant freighter
-            await mpc.output(order.origin, receivers=0)
-            await mpc.output(order.destination, receivers=0)
-            await mpc.output(order.volume, receivers=0)
-            # Test only!
-            self.logger.debug("Origin: %s", await mpc.output(order.origin))
-            self.logger.debug("Destination: %s", await mpc.output(order.destination))
-            self.logger.debug("Volume: %s", await mpc.output(order.volume))
+        await self._reveal_solution()
 
         end_time_solver = time.perf_counter()
         self.logger.debug(
