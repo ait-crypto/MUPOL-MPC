@@ -1,5 +1,6 @@
 """
-This module contains the functions to upload the input data to the MPyC framework.
+This module contains the functions to 'upload' the input data to the MPyC framework
+(i.e. secret-share it).
 """
 
 from mpyc.runtime import mpc
@@ -10,17 +11,25 @@ from mupol.plaintext.freighters_day_planning.truck import Truck
 
 async def upload_order(order: Order, secint: type) -> None:
     """Function to secret-share a single order object.
+    Notice that we assume that the order object always comes from the first MPC player:
+    this is enough for the current MUPOL demonstrator but will need to be made more
+    flexible when moving to highter TRL or more realistic experiments.
 
     :param order: the order to be secret-shared
     :param secint: the desired type of MPyC secret sharing
     """
+    order.id = mpc.input(secint(order.id), senders=0)
     order.origin = mpc.input(secint(order.origin), senders=0)
     order.destination = mpc.input(secint(order.destination), senders=0)
     order.volume = mpc.input(secint(order.volume), senders=0)
+    order.priority = mpc.input(secint(order.priority), senders=0)
 
 
 async def initialize_order(order: Order, secint: type, dummy_freighter_id: int) -> None:
     """Set initial order variables.
+    Notice that we assume that the order object always comes from the first MPC player:
+    this is enough for the current MUPOL demonstrator but will need to be made more
+    flexible when moving to highter TRL or more realistic experiments.
 
     :param order: the relevant order object
     :param secint: the desired type of the MPyC secret-shared values
@@ -33,6 +42,9 @@ async def initialize_order(order: Order, secint: type, dummy_freighter_id: int) 
 
 async def upload_truck(truck: Truck, secint: type) -> None:
     """Function to secret-share a single truck object.
+    Notice that we assume that the truck object always comes from the first MPC player:
+    this is enough for the current MUPOL demonstrator but will need to be made more
+    flexible when moving to highter TRL or more realistic experiments.
 
     :param truck: the truck to be secret-shared
     :param secint: the desired type of MPyC secret sharing
@@ -44,6 +56,9 @@ async def upload_truck(truck: Truck, secint: type) -> None:
 
 async def initialize_truck(truck: Truck, dummy_node: int, secint: type) -> None:
     """Set initial truck variables.
+    Notice that we assume that the truck object always comes from the first MPC player:
+    this is enough for the current MUPOL demonstrator but will need to be made more
+    flexible when moving to highter TRL or more realistic experiments.
 
     :param truck: the relevant truck object
     :param dummy_node: which value to use for truck with no destination assigned
