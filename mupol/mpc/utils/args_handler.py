@@ -27,7 +27,7 @@ class MPCArgsHandler(ArgsHandler):
         self.args = self._parser.parse_args(self._args)
 
     def _init_parser(self) -> None:
-        """Add arguments to parser and pars them."""
+        """Add arguments to parser and parse them."""
         self._parser.add_argument(
             "--dummy-node", type=int, help="ID of dummy node for MPC computation"
         )
@@ -45,5 +45,26 @@ class MPCArgsHandler(ArgsHandler):
             "--logger-config",
             type=str,
             help="Location of logger config",
+        )
+        self._parser.add_argument(
+            "--use-priorities",
+            type=int,
+            help="Flag to indicate whether solver should make use of order priorities.\
+            Use 0 or 1 instead of Boolean to due Python quirks when parsing defaults\
+            from a config file",
+        )
+        self._parser.add_argument(
+            "--test-mode",
+            type=int,
+            help="Flag to indicate whether to run the solver in test mode, meaning that\
+            some values will be reconstructed for validation and debugging purposes.",
+        )
+        self._parser.add_argument(
+            # TODO: this argument should be moved to the plaintext parser
+            "--norm-weight",
+            type=float,
+            help="Weight alpha of the norm used to evaluate the quality of the\
+            solution, meaning we will compute the value\
+            alpha * empty_km_norm + (1-alpha) * swap_norm.",
         )
         self.args = self._parser.parse_known_args(self._args)

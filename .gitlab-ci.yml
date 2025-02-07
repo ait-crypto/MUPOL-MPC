@@ -1,4 +1,6 @@
-image: python:3.10
+image:
+  name: python:3.10
+  pull_policy: [always, if-not-present]
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -6,35 +8,28 @@ variables:
   FLAKE8_MAX_LINE_LENGTH: 88
 
 stages:
-  - setup
   - test
   - security
   - style
   - docs
   - build
 
-Poetry install:
-  stage: setup
-  cache:
-    policy: pull-push
-    paths:
-      - .venv/
-      - .cache/pip
-  script:
-    - pip install poetry
-    - poetry config http-basic.mupol-plaintext $CI_DEPLOY_USER $CI_DEPLOY_PASSWORD
-    - poetry config virtualenvs.in-project true
-    - poetry install
+cache:
+  policy: pull-push
+  paths:
+    - .venv/
+    - .cache/pip
+
+before_script:
+  - pip install poetry
+  - poetry config http-basic.mupol-plaintext $CI_DEPLOY_USER $CI_DEPLOY_PASSWORD
+  - poetry config virtualenvs.in-project true
+  - poetry install --all-extras
+  - source .venv/bin/activate
 
 Pytest:
   stage: test
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - pytest --version
     - pytest --cov --cov-fail-under=${PYTEST_COVERAGE_THRESHOLD} --cov-report xml --color=yes .
   artifacts:
@@ -43,73 +38,37 @@ Pytest:
 
 MyPy:
   stage: style
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - mypy --version
     - mypy --install-types --non-interactive --ignore-missing-imports --allow-subclassing-any --explicit-package-bases --strict .
 
 Black:
   stage: style
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - black --version
     - black --check --diff --color .
 
 isort:
   stage: style
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - isort --version
     - isort --check --profile=black --diff --color .
 
 Flake8:
   stage: style
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - flake8 --version
     - flake8 --statistics --max-line-length=${FLAKE8_MAX_LINE_LENGTH} --extend-exclude "./.venv/*"
 
 Bandit:
   stage: security
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - bandit --version
     - bandit --verbose --recursive . -x "./tests/*,./.venv/*"
 
 PDoc:
   stage: docs
-  cache:
-    policy: pull
-    paths:
-      - .venv/
-      - .cache/pip
   script:
-    - source .venv/bin/activate
     - pdoc --version
     - pdoc mupol.mpc -o docs
   artifacts:
@@ -118,14 +77,8 @@ PDoc:
 
 Poetry build:
   stage: build
-  cache:
-    policy: pull
-    paths:
-      - .venv
-      - .cache/pip
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   script:
-    - pip install poetry
     - poetry config repositories.mupol-mpc https://git-service.ait.ac.at/api/v4/projects/sct-crypto%2Fmupol%2Fmupol-mpc-demonstrator/packages/pypi
     - poetry publish --build --repository mupol-mpc -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD

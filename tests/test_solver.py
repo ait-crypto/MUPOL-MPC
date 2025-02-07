@@ -136,9 +136,8 @@ async def test_find_truck_dist_to_order(
     route_matrix = [
         [mpc.input(secint(entry), senders=0) for entry in row] for row in route_matrix
     ]
-    await solver._find_truck_dist_to_order(
-        empty_truck, random_node_indicator_vector, route_matrix
-    )
+    solver._route_matrix = route_matrix
+    await solver._find_truck_dist_to_order(empty_truck, random_node_indicator_vector)
 
 
 @pytest.mark.asyncio
@@ -176,6 +175,20 @@ async def test_move_truck(
     assert await mpc.output(
         solver.trucks[random_truck_index].position
     ) == await mpc.output(random_map_position)
+
+
+@pytest.mark.asyncio
+async def test_sort_orders(mpc_problem: Problem, solver: MPCSolver) -> None:
+    """Check that sorted orders have non-increasing priorities"""
+    await solver._sort_orders()
+    order_priorities: List[int] = []
+    priorities_decreasing = 1
+    for order in mpc_problem.orders:
+        order_priorities.append(await mpc.output(order.priority))
+        if len(order_priorities) >= 2:
+            if order_priorities[-1] > order_priorities[-2]:
+                priorities_decreasing = 0
+    assert priorities_decreasing == 1
 
 
 @pytest.mark.asyncio
