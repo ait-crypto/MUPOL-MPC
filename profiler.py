@@ -17,8 +17,11 @@ from mupol.mpc.solver import MPCSolver
 from mupol.mpc.utils.args_handler import MPCArgsHandler
 from mupol.mpc.utils.logger import setup_logger
 
-POSSIBLE_ORDERS = [10, 100, 1000]
-POSSIBLE_TRUCKS = [5, 50, 500]
+POSSIBLE_ORDERS = [500]
+POSSIBLE_TRUCKS = [1, 2, 3, 4, 5]
+POSSIBLE_FREIGHTERS = [1]
+POSSIBLE_MAX_ORDER_VOLUMES = [10, 20, 32]
+NUM_EXPERIMENTS = 1
 
 
 async def run_profiler(possible_orders: List[int], possible_trucks: List[int]) -> None:
@@ -52,19 +55,42 @@ async def run_profiler(possible_orders: List[int], possible_trucks: List[int]) -
         stop_time = time.perf_counter()
         logger.debug("Time for uploading MPC data: %s", stop_time - start_time)
 
-        solver = MPCSolver(
-            problem,
-            args.dummy_freighter_id,
-            args.dummy_node,
-            args.truck_capacity,
-            logger,
-        )
-        await solver.solve_problem()
-        logger.debug("----------------------------------------------------------")
-    await mpc.shutdown()
+            start_time = time.perf_counter()
+            await mpc.start()
+            await prepare_mpc_data(
+                problem,
+                args.dummy_freighter_id,
+                args.dummy_node,
+                args.bit_length_sectypes,
+            )
+            stop_time = time.perf_counter()
+            logger.debug("Time for uploading MPC data: %s", stop_time - start_time)
+
+            solver = MPCSolver(
+                problem,
+                args.dummy_freighter_id,
+                args.dummy_node,
+                args.truck_capacity,
+                args.use_priorities,
+                args.test_mode,
+                logger,
+                args.norm_weight,
+            )
+            await solver.solve_problem()
+            logger.debug("----------------------------------------------------------")
+            i += 1
+            time.sleep(5)  # Some buffer to ensure MPyC shuts down correctly
+            await mpc.shutdown()
+        logger.debug("==========================================================")
 
 
 if __name__ == "__main__":
     mpc.run(
-        run_profiler(possible_orders=POSSIBLE_ORDERS, possible_trucks=POSSIBLE_TRUCKS)
+        run_profiler(
+            possible_orders=POSSIBLE_ORDERS,
+            possible_trucks=POSSIBLE_TRUCKS,
+            possible_freighters=POSSIBLE_FREIGHTERS,
+            possible_max_order_volumes=POSSIBLE_MAX_ORDER_VOLUMES,
+            num_experiments=NUM_EXPERIMENTS,
+        )
     )

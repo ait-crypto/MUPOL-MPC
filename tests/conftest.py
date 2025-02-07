@@ -79,13 +79,31 @@ def possible_trucks_scalability() -> List[int]:
 
 
 @pytest.fixture
+def possible_freighters_scalability() -> List[int]:
+    return [1, 3]
+
+
+@pytest.fixture
+def possible_max_order_volumes_scalability() -> List[int]:
+    return [1, 20, 32]
+
+
+@pytest.fixture
+def num_experiments_scalability() -> int:
+    return 2
+
+
+@pytest.fixture
 def solver(args: Namespace, mpc_problem: Problem, logger: Logger) -> MPCSolver:
     return MPCSolver(
         mpc_problem,
         args.dummy_freighter_id,
         args.dummy_node,
         args.truck_capacity,
+        args.use_priorities,
+        args.test_mode,
         logger,
+        args.norm_weight,
     )
 
 
@@ -112,6 +130,11 @@ def min_order_volume(args: Namespace) -> Any:
 @pytest.fixture(scope="module")
 def max_capacity(args: Namespace) -> Any:
     return args.truck_capacity
+
+
+@pytest.fixture(scope="module")
+def medium_priority() -> int:
+    return 2
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -143,10 +166,14 @@ async def small_order(
     default_position: int,
     other_position: int,
     min_order_volume: int,
+    medium_priority: int,
     secint: type,
 ) -> Order:
     order = Order(
-        origin=default_position, destination=other_position, volume=min_order_volume
+        origin=default_position,
+        destination=other_position,
+        volume=min_order_volume,
+        priority=medium_priority,
     )
     await upload_order(order, secint)
     await initialize_order(order, secint, args.dummy_freighter_id)
